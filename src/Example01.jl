@@ -5,6 +5,7 @@ MDP:
 - Date: 2021-05-06
 =#
 include("common_defs.jl")
+include("common_checks.jl")
 
 const MinX = 0
 const MaxX = 100
