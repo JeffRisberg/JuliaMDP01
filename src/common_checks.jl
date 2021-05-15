@@ -1,5 +1,4 @@
 function checkArgumentOrder(mdp::MDP)
-
   statedim = length(mdp.statemap)
   actiondim = length(mdp.actionmap)
 
@@ -37,7 +36,6 @@ function checkArgumentOrder(mdp::MDP)
       end
     end
   end
-
 end
 
 function checkTransition(mdp::MDP)
