@@ -21,7 +21,6 @@ function internalsolve(mdp::MDP, svi::SerialValueIteration)
 end
 
 function solveset(mdp::MDP, svi::SerialValueIteration)
-
   statedim = length(mdp.statemap)
   stateargs = mdp.reward.argnames[1:statedim]
   actionargs = mdp.reward.argnames[1 + statedim:end]
@@ -111,7 +110,6 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
     cputime,
     iter,
     resid)
-
 end
 
 function solveprob(mdp::MDP, svi::SerialValueIteration)
