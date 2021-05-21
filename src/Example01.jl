@@ -97,6 +97,15 @@ println(solver.actiongrid)
 
 println(length(mdp.transition.argnames) == length(mdp.statemap) + length(mdp.actionmap))
 
+# make a call to getIdx
+statedim = length(mdp.statemap)
+map = mdp.statemap
+argnames =  mdp.reward.argnames[1 + statedim:end]
+state = [1 2]
+r = getidx(map, argnames, state)
+println(r)
+
+
 function solveset(mdp::MDP, svi::SerialValueIteration)
 
   statedim = length(mdp.statemap)

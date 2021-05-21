@@ -5,7 +5,7 @@ export
   ParallelValueIteration,
   discretize_statevariable!
 
-const MaxIter = 1000
+const MaxIter = 2
 const Tol = 1e-4
 const Discount = 0.99
 const NThreads = 1

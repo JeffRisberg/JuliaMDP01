@@ -51,6 +51,7 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
 
         action = getvar(svi.actiongrid, mdp.actionmap, actionargs, iaction)
 
+        # we are calling transition for each state and each action
         statepIdxs, probs = transition(mdp, svi, state, action, stateargs)
         qnow = 0.0
 

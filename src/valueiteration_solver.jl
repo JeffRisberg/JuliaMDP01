@@ -92,9 +92,9 @@ function getidx(
   end
 
   return idx
-
 end
 
+# given the state, return next state and probs
 function transition(
     mdp::MDP,
     vi::ValueIteration,
@@ -102,25 +102,36 @@ function transition(
     action::Vector,
     stateargnames::Vector{String})
 
+  println("begin transition, with state");
+  println(state)
+
+  # run the transition function
   results = mdp.transition.fn(state..., action...)
+  println("transition method results: ")
+  println(results)
   nresults = length(results)
+  println(nresults)
 
   interps = [
     interpolants(
       vi.stategrid,
       getidx(mdp.statemap, stateargnames, results[i][1]))
     for i in 1:nresults]
+  println(interps)
 
   nstateps = 0
   for interp in interps
     nstateps += length(interp[1])
   end
+  println(nstateps) # this is number of resulting states
 
   states = Array{Int64,1}(undef, nstateps)
   probs = Array{Float64,1}(undef, nstateps)
 
   istate = 0
   for iresult in 1:nresults
+    println("len")
+    println(length(interps[iresult][1]))
     for iinterp in 1:length(interps[iresult][1])
       istate += 1
       states[istate] = interps[iresult][1][iinterp]
@@ -128,6 +139,9 @@ function transition(
     end
   end
 
+  println("end transition");
+  println(states)
+  println(probs)
   return states, probs
 end
 
