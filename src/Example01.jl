@@ -97,15 +97,6 @@ println(solver.actiongrid)
 
 println(length(mdp.transition.argnames) == length(mdp.statemap) + length(mdp.actionmap))
 
-# make a call to getIdx
-statedim = length(mdp.statemap)
-map = mdp.statemap
-argnames =  mdp.reward.argnames[1 + statedim:end]
-state = [1 2]
-r = getidx(map, argnames, state)
-println(r)
-
-
 function solveset(mdp::MDP, svi::SerialValueIteration)
 
   statedim = length(mdp.statemap)
@@ -154,7 +145,6 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
           qhi = qnow
           vnew[istate] = qhi
         end
-
       end
 
       # use infinity-norm
@@ -168,6 +158,8 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
 
     if svi.verbose
       println(string("iter $iter, resid: $resid"))
+      println()
+      println()
     end
 
     resid < svi.tol ? break : nothing
@@ -176,7 +168,6 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
     vold = vnew
     vnew = vtmp
     iter = i
-
   end
 
   if iter == svi.maxiter
