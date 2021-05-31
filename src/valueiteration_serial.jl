@@ -106,6 +106,7 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
 
   return ValueIterationSolution(
     qval,
+    vnew,
     svi.stategrid,
     svi.actiongrid,
     cputime,

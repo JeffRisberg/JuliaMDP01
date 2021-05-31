@@ -102,13 +102,8 @@ function transition(
     action::Vector,
     stateargnames::Vector{String})
 
-  println("begin transition, with state");
-  println(state)
-
   # run the transition function
   results = mdp.transition.fn(state..., action...)
-  println("transition method results: ")
-  println(results)
   nresults = length(results)
 
   interps = [
@@ -134,7 +129,6 @@ function transition(
     end
   end
 
-  println("end transition");
   return states, probs
 end
 

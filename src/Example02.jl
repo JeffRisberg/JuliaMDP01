@@ -23,8 +23,11 @@ function is_valid_state(state::Tuple{Vector{Float64}, Float64})
 end
 
 function mytransition(x::Float64, y::Float64, move::AbstractString)
-    @info "from ", x, y, move
-  if move == "L"
+  if x == 4.0 && y == 2.0
+    result = [([x, y], 0.0)]
+  elseif x == 4.0 && y == 3.0
+    result = [([x, y], 0.0)]
+  elseif move == "L"
     if x > 1.0
       result = [([x - 1.0, y], 0.8), ([x, y - 1.0], 0.1), ([x, y + 1.0], 0.1)]
     else
@@ -82,7 +85,7 @@ println(solver.actiongrid)
 
 println(length(mdp.transition.argnames) == length(mdp.statemap) + length(mdp.actionmap))
 
-function solveset(mdp::MDP, svi::SerialValueIteration)
+function solveset2(mdp::MDP, svi::SerialValueIteration)
 
   statedim = length(mdp.statemap)
   stateargs = mdp.reward.argnames[1:statedim]
@@ -93,6 +96,7 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
 
   vold = zeros(nstates)
   vnew = zeros(nstates)
+
   qval = zeros(nactions, nstates)
   resid = 0.0
 
@@ -101,41 +105,39 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
   cputime = 0.0
 
   for i in 1:svi.maxiter
-
+    vnew = zeros(nstates)
     #tic()
     resid = -Inf
 
     for istate in 1:nstates
 
       state = getvar(svi.stategrid, mdp.statemap, stateargs, istate)
-      qhi = -Inf
+      vmax = -Inf
 
       for iaction in 1:nactions
 
         action = getvar(svi.actiongrid, mdp.actionmap, actionargs, iaction)
 
         statepIdxs, probs = transition(mdp, svi, state, action, stateargs)
-        qnow = 0.0
+        v = 0.0
 
         for istatep in 1:length(statepIdxs)
-          qnow += probs[istatep] * vold[statepIdxs[istatep]]
+          v += probs[istatep] * vold[statepIdxs[istatep]]
         end
 
-        qnow *= svi.discount
-        qnow += reward(mdp, state, action)
-
-        qval[iaction, istate] = qnow
-
-        if qnow > qhi
-          qhi = qnow
-          vnew[istate] = qhi
+        if v > vmax
+          vmax = v
         end
       end
+
+      vmax *= svi.discount
+      vmax += reward(mdp, state, action)
+
+      vnew[istate] = vmax
 
       # use infinity-norm
       newresid = (vold[istate] - vnew[istate])^2
       newresid > resid ? resid = newresid : nothing
-
     end
 
     #itertime = toq()
@@ -143,15 +145,11 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
 
     if svi.verbose
       println(string("iter $iter, resid: $resid"))
-      println()
-      println()
     end
 
     resid < svi.tol ? break : nothing
 
-    vtmp = vold
-    vold = vnew
-    vnew = vtmp
+    vold = copy(vnew)
     iter = i
   end
 
@@ -174,6 +172,28 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
     cputime,
     iter,
     resid)
+end
+
+function getpolicy2(mdp::MDP, svi::SerialValueIteration, solution::ValueIterationSolution)
+  statedim = length(mdp.statemap)
+  stateargs = mdp.reward.argnames[1:statedim]
+  actionargs = mdp.reward.argnames[1 + statedim:end]
+
+  nstates = length(svi.stategrid)
+  nactions = length(svi.actiongrid)
+
+  local pi::Dict = Dict();
+
+  for istate in 1:nstates
+
+      state = getvar(svi.stategrid, mdp.statemap, stateargs, istate)
+      vmax = -Inf
+
+      # pi[state] = argmax(collect(actions(mdp, state)), (function(action::Union{Nothing, Tuple{Int64, Int64}})
+      #                                                          return expected_utility(mdp, U, state, action);
+      #                                                      end));
+  end
+  return pi;
 end
 
 statedim = length(mdp.statemap)
@@ -204,10 +224,10 @@ action = getvar(solver.actiongrid, mdp.actionmap, actionargs, iaction)
 @info ("reward for state 12:", reward(mdp, state, action))
 
 solver.discount = 0.9
-solver.maxiter = 1
+solver.maxiter = 100
 
-solution = solveset(mdp, solver)
+solution = solveset2(mdp, solver)
 println(solution.v)
 
-# policy = getpolicy(mdp, solution)
-# println(policy(1))
+policy = getpolicy2(mdp, solver, solution)
+println(policy)
