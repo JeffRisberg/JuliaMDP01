@@ -19,6 +19,9 @@ statevariable!(mdp, "y", 1.0, 3.0)
 actionvariable!(mdp, "move", ["U", "D", "L", "R"])  # discrete
 
 function is_valid_state(state::Tuple{Vector{Float64}, Float64})
+    if state[1][1] == 2.0 && state[1][2] == 2.0
+        return false
+    end
     return state[1][1] > 0 && state[1][1] < 5 && state[1][2] > 0 && state[1][2] < 4
 end
 
@@ -189,9 +192,21 @@ function getpolicy2(mdp::MDP, svi::SerialValueIteration, solution::ValueIteratio
       state = getvar(svi.stategrid, mdp.statemap, stateargs, istate)
       vmax = -Inf
 
-      # pi[state] = argmax(collect(actions(mdp, state)), (function(action::Union{Nothing, Tuple{Int64, Int64}})
-      #                                                          return expected_utility(mdp, U, state, action);
-      #                                                      end));
+      for iaction in 1:nactions
+        action = getvar(svi.actiongrid, mdp.actionmap, actionargs, iaction)
+        statepIdxs, probs = transition(mdp, svi, state, action, stateargs)
+
+        v = 0.0
+
+        for istatep in 1:length(statepIdxs)
+          v += probs[istatep] * solution.v[statepIdxs[istatep]]
+        end
+
+        if v > vmax
+          vmax = v
+          pi[istate] = action
+        end
+      end
   end
   return pi;
 end
