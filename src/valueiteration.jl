@@ -5,7 +5,7 @@ export
   ParallelValueIteration,
   discretize_statevariable!
 
-const MaxIter = 2
+const MaxIter = 20
 const Tol = 1e-4
 const Discount = 0.99
 const NThreads = 1
@@ -83,21 +83,22 @@ end
 
 mutable struct ValueIterationSolution <: Solution
   qval::Matrix{Float64}  # nactions x nstates Q-value matrix
+  v::Vector{Float64}
   stategrid::RectangleGrid
   actiongrid::RectangleGrid
-
   cputime::Float64
   niter::Int64
   finaltol::Float64
 
   ValueIterationSolution(
       qval::Matrix{Float64},
+      v::Vector{Float64},
       stategrid::RectangleGrid,
       actiongrid::RectangleGrid,
       cputime::Float64,
       niter::Int64,
       finaltol::Float64) =
-    new(qval, stategrid, actiongrid, cputime, niter, finaltol)
+    new(qval, v, stategrid, actiongrid, cputime, niter, finaltol)
 end
 
 function discretize_statevariable!(vi::ValueIteration, varname::AbstractString, step::Real)

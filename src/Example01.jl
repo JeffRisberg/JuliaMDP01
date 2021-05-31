@@ -83,6 +83,8 @@ end
 reward!(mdp, ["x", "goal", "move"], myreward)
 
 solver = SerialValueIteration()
+solver.discount = 0.9
+solver.maxiter = 1
 
 const StepX = 20
 discretize_statevariable!(solver, "x", StepX)

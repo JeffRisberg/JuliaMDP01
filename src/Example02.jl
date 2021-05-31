@@ -18,43 +18,50 @@ statevariable!(mdp, "y", 1.0, 3.0)
 # action space
 actionvariable!(mdp, "move", ["U", "D", "L", "R"])  # discrete
 
+function is_valid_state(state::Tuple{Vector{Float64}, Float64})
+    return state[1][1] > 0 && state[1][1] < 5 && state[1][2] > 0 && state[1][2] < 4
+end
+
 function mytransition(x::Float64, y::Float64, move::AbstractString)
+    @info "from ", x, y, move
   if move == "L"
     if x > 1.0
-      return [([x - 1.0, y], 1.0)]
+      result = [([x - 1.0, y], 0.8), ([x, y - 1.0], 0.1), ([x, y + 1.0], 0.1)]
     else
-      return [([x, y], 1.0)]
+      result = [([x, y], 1.0)]
     end
   elseif move == "R"
     if x < 4.0
-      return [([x + 1.0, y], 1.0)]
+      result = [([x + 1.0, y], 0.8), ([x, y - 1.0], 0.1), ([x, y + 1.0], 0.1)]
     else
-      return [([x, y], 1.0)]
+      result = [([x, y], 1.0)]
     end
   elseif move == "U"
-    if y > 1.0
-      return [([x, y - 1.0], 1.0)]
+    if y < 3.0
+      result = [([x, y + 1.0], 0.8), ([x - 1.0, y], 0.1), ([x + 1.0, y], 0.1)]
     else
-      return [([x, y], 1.0)]
+      result = [([x, y], 1.0)]
     end
   elseif move == "D"
-    if y < 3.0
-      return [([x, y + 1.0], 1.0)]
+    if y > 1.0
+      result = [([x, y - 1.0], 0.8), ([x - 1.0, y], 0.1), ([x + 1.0, y], 0.1)]
     else
-      return [([x, y], 1.0)]
+      result = [([x, y], 1.0)]
     end
   end
+  filtered_result = filter(is_valid_state, result)
+  return filtered_result
 end
 
 transition!(mdp, ["x", "y", "move"], mytransition)
 
 function myreward(x::Float64, y::Float64, move::AbstractString)
-  if x == 4 && y == 3
-    return 1
-  elseif x == 4 && y == 2
-    return -1
+  if x == 4.0 && y == 3.0
+    return 1.0
+  elseif x == 4.0 && y == 2.0
+    return -1.0
   else
-    return 0
+    return 0.0
   end
 end
 
@@ -161,6 +168,7 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
 
   return ValueIterationSolution(
     qval,
+    vnew,
     svi.stategrid,
     svi.actiongrid,
     cputime,
@@ -168,8 +176,38 @@ function solveset(mdp::MDP, svi::SerialValueIteration)
     resid)
 end
 
-solution = solveset(mdp, solver)
-println(solution)
+statedim = length(mdp.statemap)
+stateargs = mdp.reward.argnames[1:statedim]
+actionargs = mdp.reward.argnames[1 + statedim:end]
 
-policy = getpolicy(mdp, solution)
-println(policy(1))
+istate = 1
+state = getvar(solver.stategrid, mdp.statemap, stateargs, istate)
+
+iaction = 4
+action = getvar(solver.actiongrid, mdp.actionmap, actionargs, iaction)
+
+statepIdxs, probs = transition(mdp, solver, state, action, stateargs)
+println(statepIdxs)
+println(probs)
+
+
+istate = 8
+state = getvar(solver.stategrid, mdp.statemap, stateargs, istate)
+iaction = 4
+action = getvar(solver.actiongrid, mdp.actionmap, actionargs, iaction)
+@info ("reward for state 8:", reward(mdp, state, action))
+
+istate = 12
+state = getvar(solver.stategrid, mdp.statemap, stateargs, istate)
+iaction = 4
+action = getvar(solver.actiongrid, mdp.actionmap, actionargs, iaction)
+@info ("reward for state 12:", reward(mdp, state, action))
+
+solver.discount = 0.9
+solver.maxiter = 1
+
+solution = solveset(mdp, solver)
+println(solution.v)
+
+# policy = getpolicy(mdp, solution)
+# println(policy(1))

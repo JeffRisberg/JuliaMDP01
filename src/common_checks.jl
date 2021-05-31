@@ -39,6 +39,7 @@ function checkArgumentOrder(mdp::MDP)
 end
 
 function checkTransition(mdp::MDP)
+    #=
   args = randargs(mdp)
   transitionval = mdp.transition.fn(args...)
 
@@ -50,6 +51,7 @@ function checkTransition(mdp::MDP)
       "T(s,a,s') or T(s,a) type function, check the return type\n",
       "return type: ", typeof(transitionval)))
   end
+  =#
 end
 
 function checkTransition(mdp::MDP, args::Vector, transitionval::Real)
