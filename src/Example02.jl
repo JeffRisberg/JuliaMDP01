@@ -239,7 +239,7 @@ action = getvar(solver.actiongrid, mdp.actionmap, actionargs, iaction)
 @info ("reward for state 12:", reward(mdp, state, action))
 
 solver.discount = 0.9
-solver.maxiter = 100
+solver.maxiter = 5
 
 solution = solveset2(mdp, solver)
 println(solution.v)
