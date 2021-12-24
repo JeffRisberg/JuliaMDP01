@@ -1,6 +1,5 @@
 #=
-valueiteratio_solver:
-- Julia version: 1.6.0
+valueiteration_solver:
 - Author: jeff
 - Date: 2021-05-14
 =#

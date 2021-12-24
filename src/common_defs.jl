@@ -1,6 +1,5 @@
 #=
 common_defs:
-- Julia version: 1.6.0
 - Author: jeff
 - Date: 2021-05-22
 =#
